@@ -1,5 +1,5 @@
 limitless_wsapi
-=====
+===============
 
 A Websocket API interface for Limitless.
 
@@ -15,15 +15,21 @@ Build
 Run
 ---
 
-    $ make all
+    $ make node1
 
 Open a websocket client and connect to `ws://127.0.0.1:8080/`.
+
+Setup limits for a token
+------------------------
 
 Then, setup the token configuration sending the message:
 
 ```json
 {"command": "setup", "context": {"objectids": ["token1"], "group": "token"}}
 ```
+
+Ask if request reach some limits
+--------------------------------
 
 Now, every time you receive a request made with this token, you'll simply ask
 if who request the resource has reach some limits
@@ -77,3 +83,24 @@ X-RateLimit-Token-15min-Limit: 100
 X-RateLimit-Token-15min-Remaining: 97
 X-RateLimit-Token-15min-Reset: 856
 ```
+
+Make a servers cluster
+---------------------
+
+Open the first console and run:
+
+    $ make node1
+
+In another console run:
+
+    $ make node2
+    1> riak_core:join('test1@127.0.0.1').
+
+Now you can open a websocket connect to `ws://127.0.0.1:8080/` or to
+`ws://127.0.0.1:8081/`.
+
+You can note that the node you are choosing is not important.
+Also, at runtime, you can disconnect from one and connect to the other without
+loosing information.
+
+It can be useful to create a connection pool from client side.

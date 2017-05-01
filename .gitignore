@@ -16,4 +16,6 @@ _build
 .idea
 rebar3.crashdump
 compile_commands.json
+data_*
+ring_state_dir_*
 rebar.lock

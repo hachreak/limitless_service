@@ -17,12 +17,13 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
+  WsPort = application:get_env(limitless_wsapi, ws_port, 8080),
   Dispatch = cowboy_router:compile([
     {'_', [
       {"/", limitless_wsapi_handler, {}}
     ]}
   ]),
-  {ok, _} = cowboy:start_http(http, 100, [{port, 8080}], [
+  {ok, _} = cowboy:start_http(http, 100, [{port, WsPort}], [
     {env, [{dispatch, Dispatch}]}
   ]),
 

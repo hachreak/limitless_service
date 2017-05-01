@@ -5,7 +5,10 @@
   {mod, { limitless_wsapi_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    limitless,
+    cowboy,
+    minidb
    ]},
   {env,[]},
   {modules, []},

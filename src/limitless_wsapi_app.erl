@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%% @doc limitless_wsapi public API
+%% @doc limitless_wsapi application
 %% @end
 %%%-------------------------------------------------------------------
 
@@ -17,11 +17,20 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
-    limitless_wsapi_sup:start_link().
+  Dispatch = cowboy_router:compile([
+    {'_', [
+      {"/", limitless_wsapi_handler, {}}
+    ]}
+  ]),
+  {ok, _} = cowboy:start_http(http, 100, [{port, 8080}], [
+    {env, [{dispatch, Dispatch}]}
+  ]),
+
+  limitless_wsapi_sup:start_link().
 
 %%--------------------------------------------------------------------
 stop(_State) ->
-    ok.
+  ok.
 
 %%====================================================================
 %% Internal functions

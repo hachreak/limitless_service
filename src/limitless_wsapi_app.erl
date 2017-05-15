@@ -44,7 +44,7 @@ stop(_State) ->
 %%====================================================================
 
 -spec routes(appctx()) -> {http | https, cowboy_router:routes()}.
-routes(#{protocol := Protocol}=AppCtx) ->
+routes(#{protocol := Protocol}) ->
   Filename = swagger_filename(),
   Yaml = swagger_routerl:load(Filename),
   {ok, SwaggerFileRaw} = file:read_file(Filename),
@@ -52,12 +52,14 @@ routes(#{protocol := Protocol}=AppCtx) ->
   FileEndpoint = swagger_routerl_cowboy_rest:file_endpoint(
     SwaggerFileRaw, #{endpoint => endpoint(Yaml),
     protocol => swagger_routerl_utils:to_binary(Protocol)}),
+  RestEndpoints = swagger_routerl_cowboy_rest:compile(
+    "limitless_wsapi_rest_", Yaml, #{}),
   WSEndpoint = swagger_routerl_cowboy_ws:compile(
     "limitless_wsapi_ws_", Yaml, fuubar, #{
     handler => swagger_routerl_cowboy_v1_ws_json_dispatcher
   }),
 
-  FileEndpoint ++ WSEndpoint.
+  FileEndpoint ++ RestEndpoints ++ WSEndpoint.
 
 swagger_filename() ->
   PrivDir = code:priv_dir(limitless_wsapi),

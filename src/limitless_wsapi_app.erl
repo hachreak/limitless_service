@@ -52,8 +52,12 @@ routes(#{protocol := Protocol}=AppCtx) ->
   FileEndpoint = swagger_routerl_cowboy_rest:file_endpoint(
     SwaggerFileRaw, #{endpoint => endpoint(Yaml),
     protocol => swagger_routerl_utils:to_binary(Protocol)}),
+  WSEndpoint = swagger_routerl_cowboy_ws:compile(
+    "limitless_wsapi_ws_", Yaml, fuubar, #{
+    handler => swagger_routerl_cowboy_v1_ws_json_dispatcher
+  }),
 
-  FileEndpoint.
+  FileEndpoint ++ WSEndpoint.
 
 swagger_filename() ->
   PrivDir = code:priv_dir(limitless_wsapi),

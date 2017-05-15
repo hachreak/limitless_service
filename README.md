@@ -17,56 +17,63 @@ Run
 
     $ make node1
 
-Open a websocket client and connect to `ws://127.0.0.1:8080/`.
+Websocket API
+-------------
 
-Setup limits for a token
-------------------------
+Open a websocket client and connect to `ws://127.0.0.1:8080/websocket`.
 
-Then, setup the token configuration sending the message:
+#### Setup limits for a token
 
 ```json
-{"command": "setup", "context": {"objectids": ["token1"], "group": "token"}}
+{"path": "/objects/token1/groups/token", "method": "put"}
 ```
 
-Ask if request reach some limits
---------------------------------
+You should receive a response:
 
-Now, every time you receive a request made with this token, you'll simply ask
-if who request the resource has reach some limits
-(1000 req/daily or 100 req/15min).
+```json
+{"context":{},"result":"ok"}
+```
+
+#### Ask if request reach some limits
+
+Now, every time you receive a request made with this token `token`,
+you'll simply ask if who request the resource has reach some limits
+(in our example: 1000 req/daily or 100 req/15min).
 
 Send the request:
 
 ```json
-{"command": "is_reached", "context": {"objectids": ["token1"]}}
+{"path": "/objects/token1/_isreached", "method": "put"}
 ```
 
 You'll receive something like:
 
 ```json
 {
-	"info": [{
-		"extra": [{
-			"expiry": 83659,
-			"max": 1000,
-			"remaining": 990,
-			"type": "Token-Daily"
-		}, {
-			"expiry": 856,
-			"max": 100,
-			"remaining": 97,
-			"type": "Token-15min"
-		}],
-		"is_reached": false,
-		"objectid": "token1"
-	}],
-	"is_reached": false,
-	"objectid": "token1"
+  "context": {
+    "info": [{
+      "extra": [{
+        "expiry": 811,
+        "group": "Token-15min",
+        "max": 100,
+        "remaining": 100
+      }, {
+        "expiry": 86311,
+        "group": "Token-Daily",
+        "max": 1000,
+        "remaining": 1000
+      }],
+      "is_reached": false
+    }],
+    "is_reached": false
+  },
+  "result": "ok"
 }
 ```
 
 The most important information is last `is_reached`: it's saying to you if
-there is a limit reached for the `token1` and if you should block the request.
+there is a limit reached for the `token1`.
+If it's true, if'll block the request.
 
 In this case is `false` and it means that the request can proceeds.
 
@@ -84,6 +91,120 @@ X-RateLimit-Token-15min-Remaining: 97
 X-RateLimit-Token-15min-Reset: 856
 ```
 
+In the next example we'll see the tipical response if a limit is reached:
+
+```json
+{
+  "context": {
+    "info": [{
+      "extra": [{
+        "expiry": 649,
+        "group": "Token-15min",
+        "max": 100,
+        "remaining": 0
+      }, {
+        "expiry": 86149,
+        "group": "Token-Daily",
+        "max": 1000,
+        "remaining": 900
+      }],
+      "is_reached": true
+    }],
+    "is_reached": true
+  },
+  "result": "ok"
+}
+```
+
+REST API
+--------
+
+The endpoints are the same but in a REST flavour:
+
+#### Setup limits for a token
+
+```bash
+$ http PUT :8080/api/objects/token1/groups/token Content-type:application/json
+```
+
+```http
+HTTP/1.1 204 No Content
+content-length: 0
+content-type: application/json
+date: Mon, 15 May 2017 21:30:17 GMT
+server: Cowboy
+```
+
+#### Ask if request reach some limits
+
+```bash
+$ http PUT :8080/api/objects/token1/_isreached Content-type:application/json
+```
+
+```http
+HTTP/1.1 200 OK
+content-length: 190
+content-type: application/json
+date: Mon, 15 May 2017 21:31:32 GMT
+server: Cowboy
+
+{
+    "info": [
+        {
+            "extra": [
+                {
+                    "expiry": 825,
+                    "group": "Token-15min",
+                    "max": 100,
+                    "remaining": 100
+                },
+                {
+                    "expiry": 86325,
+                    "group": "Token-Daily",
+                    "max": 1000,
+                    "remaining": 1000
+                }
+            ],
+            "is_reached": false
+        }
+    ],
+    "is_reached": false
+}
+```
+
+In case, a limit is reached, you will receive a response like:
+
+```http
+HTTP/1.1 200 OK
+content-length: 185
+content-type: application/json
+date: Mon, 15 May 2017 21:33:51 GMT
+server: Cowboy
+
+{
+    "info": [
+        {
+            "extra": [
+                {
+                    "expiry": 685,
+                    "group": "Token-15min",
+                    "max": 100,
+                    "remaining": 0
+                },
+                {
+                    "expiry": 86185,
+                    "group": "Token-Daily",
+                    "max": 1000,
+                    "remaining": 900
+                }
+            ],
+            "is_reached": true
+        }
+    ],
+    "is_reached": true
+}
+```
+
 Make a servers cluster
 ---------------------
 
@@ -94,10 +215,10 @@ Open the first console and run:
 In another console run:
 
     $ make node2
-    1> riak_core:join('test1@127.0.0.1').
+    1> minidb:join('test1@127.0.0.1').
 
-Now you can open a websocket connect to `ws://127.0.0.1:8080/` or to
-`ws://127.0.0.1:8081/`.
+Now you can open a websocket connect to `ws://127.0.0.1:8080/websocket` or to
+`ws://127.0.0.1:8081/websocket`.
 
 You can note that the node you are choosing is not important.
 Also, at runtime, you can disconnect from one and connect to the other without

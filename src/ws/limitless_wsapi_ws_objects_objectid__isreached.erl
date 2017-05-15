@@ -13,7 +13,7 @@
 
 %%%_ * API -------------------------------------------------------------
 
-put(_Event, Req, [ObjectId], AppCtx) ->
+put(_Event, Req, [ObjectId], _AppCtx) ->
   {ok, LimitlessCtx} = limitless:init(),
   {IsReached, _, InfoObjects} = limitless:is_reached([ObjectId], LimitlessCtx),
   Result = #{<<"is_reached">> => IsReached,

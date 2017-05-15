@@ -13,7 +13,7 @@
 
 %%%_ * API -------------------------------------------------------------
 
-put(_Event, Req, [ObjectId, GroupIdString], AppCtx) ->
+put(_Event, Req, [ObjectId, GroupIdString], _AppCtx) ->
   {ok, LimitlessCtx} = limitless:init(),
   GroupId = swagger_routerl_utils:to_atom(GroupIdString),
   limitless:setup(ObjectId, GroupId, LimitlessCtx),

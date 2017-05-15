@@ -1,0 +1,106 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: Limitless rate-limiter API
+  description: API interface for Limitless rate-limiter
+  termsOfService: https://github.com/hachreak/limitless_wsapi
+  contact:
+    name: Limitless API team
+    url: https://github.com/hachreak/limitless_wsapi
+  license:
+    name: MIT
+    url: https://github.com/hachreak/limitless_wsapi/raw/master/LICENSE
+host: limitless.org
+basePath: /api
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /objects/{objectid}/groups/{groupid}:
+    put:
+      description: Returns all pets from the system that the user has access to
+      operationId: setupObjectid
+      parameters:
+        - name: objectid
+          in: path
+          description: Identify the object to which the group limits are associated (e.g. userid or a token)
+          required: true
+          type: string
+        - name: groupid
+          in: path
+          description: Identify the limit group
+          required: true
+          type: string
+      responses:
+        '204':
+          description: Limits associated with the objectid successfully setup
+  /objects/{objectid}/_isreached:        
+    put:
+      description: Consume the objectid. Update its limits counters in any groups and returns if one of these limits has been reached.
+      operationId: isReachedObjectId
+      parameters:
+        - name: objectid
+          in: path
+          description: ID of the object to consume.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: "Information about the objectid consumed."
+          schema:
+            $ref: '#/definitions/ObjectIdConsumed'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+    
+definitions:
+  ObjectIdConsumed:
+    type: object
+    properties:
+      is_reached:
+        type: boolean
+        description: "It's true if The objectid is correctly consumed but one of the limits has been reached."
+      info:
+        type: array
+        items:
+          $ref: '#/definitions/LimitInfo'
+  LimitInfo:
+    type: object
+    properties:
+      is_reached:
+        type: boolean
+      extra:
+        type: array
+        items:
+          $ref: '#/definitions/LimitExtra'
+  LimitExtra:
+    type: object
+    properties:
+      group: 
+        description: Group name
+        type: string
+      max: 
+        description: "Maximum number of possible requests"
+        type: integer
+      remaining:
+        description: The number of remaining requests available before the limit will be reset.
+        type: integer
+      expiry:
+        description: The number of second left before the limit will be reset.
+        type: integer
+  errorModel:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+

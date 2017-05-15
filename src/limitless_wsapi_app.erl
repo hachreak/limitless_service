@@ -12,14 +12,20 @@
 %% Application callbacks
 -export([start/2, stop/1]).
 
+-type appctx() :: any().
+-type key()      :: binary().
+-type pairs()  :: list({key(), value()}).
+-type value()    :: binary().
+
 %%====================================================================
 %% API
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
   WsPort = application:get_env(limitless_wsapi, ws_port, 8080),
+  Protocol = application:get_env(limitless_wsapi, protocol, http),
   Dispatch = cowboy_router:compile([
-    {'_', [
+    {'_', routes(#{protocol => Protocol}) ++ [
       {"/", limitless_wsapi_handler, {}}
     ]}
   ]),
@@ -36,3 +42,24 @@ stop(_State) ->
 %%====================================================================
 %% Internal functions
 %%====================================================================
+
+-spec routes(appctx()) -> {http | https, cowboy_router:routes()}.
+routes(#{protocol := Protocol}=AppCtx) ->
+  Filename = swagger_filename(),
+  Yaml = swagger_routerl:load(Filename),
+  {ok, SwaggerFileRaw} = file:read_file(Filename),
+
+  FileEndpoint = swagger_routerl_cowboy_rest:file_endpoint(
+    SwaggerFileRaw, #{endpoint => endpoint(Yaml),
+    protocol => swagger_routerl_utils:to_binary(Protocol)}),
+
+  FileEndpoint.
+
+swagger_filename() ->
+  PrivDir = code:priv_dir(limitless_wsapi),
+  Filename = "docs/swagger.yaml",
+  filename:join([PrivDir, Filename]).
+
+endpoint(Yaml) ->
+  Version = swagger_routerl:get_version(Yaml),
+  "/" ++ Version ++ "/docs/swagger.yaml".

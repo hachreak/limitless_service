@@ -29,10 +29,9 @@ allowed_methods(Req, AppCtx) ->
   {[<<"PUT">>], Req, AppCtx}.
 
 rest_init(Req, AppCtx) ->
-  {ok, LimitlessCtx} = limitless:init(),
   {ObjectId, Req2} = cowboy_req:binding(objectid, Req),
   {GroupId, Req3} = cowboy_req:binding(groupid, Req2),
-  {ok, Req3, AppCtx#{limitless => LimitlessCtx, objectid => ObjectId,
+  {ok, Req3, AppCtx#{objectid => ObjectId,
                      groupid => swagger_routerl_utils:to_atom(GroupId)}}.
 
 content_types_accepted(Req, AppCtx) ->
@@ -47,7 +46,6 @@ resource_exists(ReqData, Context) ->
     _ -> {true, ReqData, Context}
   end.
 
-from_json(Req, #{limitless := LimitlessCtx, objectid := ObjectId,
-                 groupid := GroupId}=AppCtx) ->
-  limitless:setup(ObjectId, GroupId, LimitlessCtx),
+from_json(Req, #{objectid := ObjectId, groupid := GroupId}=AppCtx) ->
+  limitless_wsapi_api:setup(ObjectId, GroupId),
   {true, Req, AppCtx}.

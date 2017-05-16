@@ -14,7 +14,5 @@
 %%%_ * API -------------------------------------------------------------
 
 put(_Event, Req, [ObjectId, GroupIdString], _AppCtx) ->
-  {ok, LimitlessCtx} = limitless:init(),
-  GroupId = swagger_routerl_utils:to_atom(GroupIdString),
-  limitless:setup(ObjectId, GroupId, LimitlessCtx),
+  limitless_wsapi_api:setup(ObjectId, GroupIdString),
   {reply, #{}, Req}.

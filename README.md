@@ -54,12 +54,12 @@ You'll receive something like:
     "info": [{
       "extra": [{
         "expiry": 811,
-        "group": "Token-15min",
+        "type": "Token-15min",
         "max": 100,
         "remaining": 100
       }, {
         "expiry": 86311,
-        "group": "Token-Daily",
+        "type": "Token-Daily",
         "max": 1000,
         "remaining": 1000
       }],
@@ -99,12 +99,12 @@ In the next example we'll see the tipical response if a limit is reached:
     "info": [{
       "extra": [{
         "expiry": 649,
-        "group": "Token-15min",
+        "type": "Token-15min",
         "max": 100,
         "remaining": 0
       }, {
         "expiry": 86149,
-        "group": "Token-Daily",
+        "type": "Token-Daily",
         "max": 1000,
         "remaining": 900
       }],
@@ -154,13 +154,13 @@ server: Cowboy
             "extra": [
                 {
                     "expiry": 825,
-                    "group": "Token-15min",
+                    "type": "Token-15min",
                     "max": 100,
                     "remaining": 100
                 },
                 {
                     "expiry": 86325,
-                    "group": "Token-Daily",
+                    "type": "Token-Daily",
                     "max": 1000,
                     "remaining": 1000
                 }
@@ -187,13 +187,13 @@ server: Cowboy
             "extra": [
                 {
                     "expiry": 685,
-                    "group": "Token-15min",
+                    "type": "Token-15min",
                     "max": 100,
                     "remaining": 0
                 },
                 {
                     "expiry": 86185,
-                    "group": "Token-Daily",
+                    "type": "Token-Daily",
                     "max": 1000,
                     "remaining": 900
                 }

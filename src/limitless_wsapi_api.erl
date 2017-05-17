@@ -36,6 +36,6 @@ extract_info(InfoObjects) ->
 
 extract_extra_info(ExtraInfo) ->
   lists:map(fun({Type, Max, Remaining, Expiry}) ->
-       #{<<"group">> => Type, <<"max">> => Max,
+       #{<<"type">> => Type, <<"max">> => Max,
          <<"remaining">> => Remaining, <<"expiry">> => Expiry}
     end, ExtraInfo).

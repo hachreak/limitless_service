@@ -21,25 +21,25 @@ produces:
 paths:
   /objects/{objectid}/groups/{groupid}:
     put:
-      description: Returns all pets from the system that the user has access to
+      description: "Register all limits part of the group. Any group can contains different types of limits (e.g. limit type: 1000 req/day)"
       operationId: setupObjectid
       parameters:
         - name: objectid
           in: path
-          description: Identify the object to which the group limits are associated (e.g. userid or a token)
+          description: Identify the object to which the type limits are associated (e.g. userid or a token)
           required: true
           type: string
         - name: groupid
           in: path
-          description: Identify the limit group
+          description: Identify the limit type
           required: true
           type: string
       responses:
         '204':
           description: Limits associated with the objectid successfully setup
-  /objects/{objectid}/_isreached:        
+  /objects/{objectid}/_isreached:
     put:
-      description: Consume the objectid. Update its limits counters in any groups and returns if one of these limits has been reached.
+      description: Consume the limits associated to the objectid and returns if anyone of them has been reached.
       operationId: isReachedObjectId
       parameters:
         - name: objectid
@@ -56,7 +56,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-    
+
 definitions:
   ObjectIdConsumed:
     type: object
@@ -80,10 +80,10 @@ definitions:
   LimitExtra:
     type: object
     properties:
-      group: 
-        description: Group name
+      type:
+        description: Type name
         type: string
-      max: 
+      max:
         description: "Maximum number of possible requests"
         type: integer
       remaining:

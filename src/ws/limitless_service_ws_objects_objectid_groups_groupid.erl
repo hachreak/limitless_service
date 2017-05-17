@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc limitless_wsapi websocket handler
+%% @doc limitless_service websocket handler
 %% @end
 %%%-------------------------------------------------------------------
 
--module(limitless_wsapi_ws_objects_objectid_groups_groupid).
+-module(limitless_service_ws_objects_objectid_groups_groupid).
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
@@ -14,5 +14,5 @@
 %%%_ * API -------------------------------------------------------------
 
 put(_Event, Req, [ObjectId, GroupIdString], _AppCtx) ->
-  limitless_wsapi_api:setup(ObjectId, GroupIdString),
+  limitless_service_api:setup(ObjectId, GroupIdString),
   {reply, #{}, Req}.

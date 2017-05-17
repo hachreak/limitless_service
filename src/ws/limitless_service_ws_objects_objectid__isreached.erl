@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc limitless_wsapi websocket handler
+%% @doc limitless_service websocket handler
 %% @end
 %%%-------------------------------------------------------------------
 
--module(limitless_wsapi_ws_objects_objectid__isreached).
+-module(limitless_service_ws_objects_objectid__isreached).
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
@@ -14,5 +14,5 @@
 %%%_ * API -------------------------------------------------------------
 
 put(_Event, Req, [ObjectId], _AppCtx) ->
-  Result = limitless_wsapi_api:is_reached(ObjectId),
+  Result = limitless_service_api:is_reached(ObjectId),
   {reply, Result, Req}.

@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc limitless_wsapi top level supervisor.
+%% @doc limitless_service top level supervisor.
 %% @end
 %%%-------------------------------------------------------------------
 
--module(limitless_wsapi_sup).
+-module(limitless_service_sup).
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 

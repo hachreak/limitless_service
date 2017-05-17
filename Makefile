@@ -11,7 +11,7 @@ compile:
 	rebar3 compile
 
 run1:
-	rebar3 shell --name test1@127.0.0.1 --config priv/limitless_wsapi_node1.config --apps limitless_wsapi
+	rebar3 shell --name test1@127.0.0.1 --config priv/limitless_service_node1.config --apps limitless_service
 
 run2:
-	rebar3 shell --name test2@127.0.0.1 --config priv/limitless_wsapi_node2.config --apps limitless_wsapi
+	rebar3 shell --name test2@127.0.0.1 --config priv/limitless_service_node2.config --apps limitless_service

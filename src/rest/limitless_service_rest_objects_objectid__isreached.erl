@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc limitless_wsapi websocket handler
+%% @doc limitless_service websocket handler
 %% @end
 %%%-------------------------------------------------------------------
 
--module(limitless_wsapi_rest_objects_objectid__isreached).
+-module(limitless_service_rest_objects_objectid__isreached).
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
@@ -38,6 +38,6 @@ content_types_provided(Req, AppCtx) ->
   {[{<<"application/json">>, to_json}], Req, AppCtx}.
 
 from_json(Req, #{objectid := ObjectId}=AppCtx) ->
-  Result = limitless_wsapi_api:is_reached(ObjectId),
+  Result = limitless_service_api:is_reached(ObjectId),
   Req2 = cowboy_req:set_resp_body(jsx:encode(Result), Req),
   {true, Req2, AppCtx}.

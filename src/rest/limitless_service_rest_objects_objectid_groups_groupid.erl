@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc limitless_wsapi websocket handler
+%% @doc limitless_service websocket handler
 %% @end
 %%%-------------------------------------------------------------------
 
--module(limitless_wsapi_rest_objects_objectid_groups_groupid).
+-module(limitless_service_rest_objects_objectid_groups_groupid).
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
@@ -47,5 +47,5 @@ resource_exists(ReqData, Context) ->
   end.
 
 from_json(Req, #{objectid := ObjectId, groupid := GroupId}=AppCtx) ->
-  limitless_wsapi_api:setup(ObjectId, GroupId),
+  limitless_service_api:setup(ObjectId, GroupId),
   {true, Req, AppCtx}.

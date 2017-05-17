@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc limitless_wsapi websocket handler
+%% @doc limitless_service websocket handler
 %% @end
 %%%-------------------------------------------------------------------
 
--module(limitless_wsapi_api).
+-module(limitless_service_api).
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 

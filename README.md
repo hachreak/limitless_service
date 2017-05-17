@@ -1,11 +1,11 @@
-limitless_wsapi
+limitless_service
 ===============
 
-A Websocket API interface for Limitless.
+A REST + Websocket API interface for Limitless.
 
 The application is using the in-memory distributed no-master document database
 [minidb](https://github.com/hachreak/minidb) in a way that you can
-have multiple nodes running `limitless_wsapi` and connect them in a cluster.
+have multiple nodes running `limitless_service` and connect them in a cluster.
 
 Build
 -----

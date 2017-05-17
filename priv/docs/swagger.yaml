@@ -3,13 +3,13 @@ info:
   version: '1.0.0'
   title: Limitless rate-limiter API
   description: API interface for Limitless rate-limiter
-  termsOfService: https://github.com/hachreak/limitless_wsapi
+  termsOfService: https://github.com/hachreak/limitless_service
   contact:
     name: Limitless API team
-    url: https://github.com/hachreak/limitless_wsapi
+    url: https://github.com/hachreak/limitless_service
   license:
     name: MIT
-    url: https://github.com/hachreak/limitless_wsapi/raw/master/LICENSE
+    url: https://github.com/hachreak/limitless_service/raw/master/LICENSE
 host: limitless.org
 basePath: /api
 schemes:

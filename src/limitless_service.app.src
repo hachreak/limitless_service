@@ -4,11 +4,14 @@
   {registered, []},
   {mod, { limitless_service_app, []}},
   {applications,
-   [kernel,
-    stdlib,
-    limitless,
+   [
     cowboy,
+    cuttlefish,
+    jsx,
+    kernel,
+    limitless,
     minidb,
+    stdlib,
     swagger_routerl
    ]},
   {env,[]},

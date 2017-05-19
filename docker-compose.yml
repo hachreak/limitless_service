@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  # Web UI Server
+  limitless_service:
+    build: .
+    command: /src/code/bin/limitless_service foreground -config /src/code/etc/app/limitless.config
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./etc:/src/code/etc/app:ro

@@ -1,46 +1,146 @@
 limitless_service
-===============
+=================
 
-A REST + Websocket API interface for Limitless.
+Rate-limiters As A Service (RLAAS):
+REST + Websocket API microservice interface for Limitless.
 
-The application is using the in-memory distributed no-master document database
-[minidb](https://github.com/hachreak/minidb) in a way that you can
-have multiple nodes running `limitless_service` and connect them in a cluster.
+The application is using the in-memory distributed master-less document
+database [minidb](https://github.com/hachreak/minidb) to be able to create
+a cluster and scale horizontally.
 
-Build
------
-
-    $ rebar3 compile
-
-Run
+API
 ---
 
-    $ make node1
+API                          | REST         | Websocket
+-----------------------------|--------------|-------------
+Setup limits for a `object`. | Implemented  | Implemented
+Ask if limit reached.        | Implemented  | Implemented
 
-Websocket API
--------------
+You can connect to the service through a REST or Websocket API.
 
-Open a websocket client and connect to `ws://127.0.0.1:8080/websocket`.
+The endpoints are defined by a unique swagger (OpenAPI) configuration.
+The [swagger_routerl](https://github.com/hachreak/swagger_routerl) is used to
+instantiate them.
 
-#### Setup limits for a token
+To get the swagger file, run the instance and get
+`http://127.0.0.1:8080/1.0.0/docs/swagger.yaml` or
+open the file `priv/docs/swagger.yaml`.
 
-```json
+You can choose to connect to the service every time you need making a REST call
+or leave a connections pool open to the websocket endpoint `/websocket` of
+one o more server in a cluster.
+
+Both interface are stateless. It means that you easily scale the service.
+
+### Configure limits
+
+In our example, we configure (see `limitless.config`) the object group
+`token`.
+
+```erlang
+    {limits, [
+      % group name: token.
+      {token, [
+        % This group incude two limit types:
+        [
+          % max 1000 req/day
+          {type, <<"Token-Daily">>},
+          {frequency, 86400}, % 1 day = 3600 * 24h
+          {requests, 1000}
+        ],
+        [
+          % max 100 req/15min
+          {type, <<"Token-15min">>},
+          {frequency, 900}, % 15 min = 60 * 15
+          {requests, 100}
+        ]
+      ]}
+    ]}
+```
+
+But you can use the group name you want and also define multiple groups
+(e.g. a group for tokens and a group for users).
+
+See `etc/limitless.config` for a complete configuration example.
+
+### Setup limits for a object
+
+In your application, at the moment a new token is created, you'll associate
+to it the limits defined by the `token` group:
+
+**--> REST example**
+
+    $ http PUT :8080/api/objects/token1/groups/token Content-type:application/json
+
+You should receive a response:
+
+```http
+HTTP/1.1 204 No Content
+content-length: 0
+content-type: application/json
+date: Mon, 15 May 2017 21:30:17 GMT
+server: Cowboy
+```
+
+**--> Websocket example**
+
+Send the message
+
+```
 {"path": "/objects/token1/groups/token", "method": "put"}
 ```
 
 You should receive a response:
 
 ```json
-{"context":{},"result":"ok"}
+{"context": {}, "result": "ok"}
 ```
 
-#### Ask if request reach some limits
+### Ask if the object reach one of defined limits
 
-Now, every time you receive a request made with this token `token`,
-you'll simply ask if who request the resource has reach some limits
-(in our example: 1000 req/daily or 100 req/15min).
+Every time you'll receive a request containing a token, you can ask if it
+has reached any defined limits.
 
-Send the request:
+**--> REST example**
+
+    $ http PUT :8080/api/objects/token1/_isreached Content-type:application/json
+
+You should receive a response:
+
+```http
+HTTP/1.1 200 OK
+content-length: 190
+content-type: application/json
+date: Mon, 15 May 2017 21:31:32 GMT
+server: Cowboy
+
+{
+    "info": [
+        {
+            "extra": [
+                {
+                    "expiry": 811,
+                    "type": "Token-15min",
+                    "max": 100,
+                    "remaining": 90
+                },
+                {
+                    "expiry": 86311,
+                    "type": "Token-Daily",
+                    "max": 1000,
+                    "remaining": 970
+                }
+            ],
+            "is_reached": false
+        }
+    ],
+    "is_reached": false
+}
+```
+
+**--> Websocket example**
+
+Send the message
 
 ```json
 {"path": "/objects/token1/_isreached", "method": "put"}
@@ -56,12 +156,12 @@ You'll receive something like:
         "expiry": 811,
         "type": "Token-15min",
         "max": 100,
-        "remaining": 100
+        "remaining": 90
       }, {
         "expiry": 86311,
         "type": "Token-Daily",
         "max": 1000,
-        "remaining": 1000
+        "remaining": 970
       }],
       "is_reached": false
     }],
@@ -73,140 +173,30 @@ You'll receive something like:
 
 The most important information is last `is_reached`: it's saying to you if
 there is a limit reached for the `token1`.
-If it's true, if'll block the request.
+If it's true, you'll block the request.
 
-In this case is `false` and it means that the request can proceeds.
+In this case is `false` and it means that the request can be processed.
 
-Inside `"extra"` you can find some interesting information useful to costruct
-`X-RateLimiter-Token1-XXX` HTTP headers.
+Inside `"extra"` you can find some interesting information useful to build
+general informations about the state of all limits.
 
-In this case:
+In case you are implementing a REST API, they are usefull to build the
+`X-RateLimiter-Token-XXX` HTTP headers.
+
+E.g.
 
 ```
 X-RateLimit-Token-Daily-Limit: 1000
-X-RateLimit-Token-Daily-Remaining: 990
-X-RateLimit-Token-Daily-Reset: 83659
+X-RateLimit-Token-Daily-Remaining: 970
+X-RateLimit-Token-Daily-Reset: 86311
 X-RateLimit-Token-15min-Limit: 100
-X-RateLimit-Token-15min-Remaining: 97
-X-RateLimit-Token-15min-Reset: 856
+X-RateLimit-Token-15min-Remaining: 90
+X-RateLimit-Token-15min-Reset: 811
 ```
 
-In the next example we'll see the tipical response if a limit is reached:
-
-```json
-{
-  "context": {
-    "info": [{
-      "extra": [{
-        "expiry": 649,
-        "type": "Token-15min",
-        "max": 100,
-        "remaining": 0
-      }, {
-        "expiry": 86149,
-        "type": "Token-Daily",
-        "max": 1000,
-        "remaining": 900
-      }],
-      "is_reached": true
-    }],
-    "is_reached": true
-  },
-  "result": "ok"
-}
-```
-
-REST API
---------
-
-The endpoints are the same but in a REST flavour:
-
-#### Setup limits for a token
-
-```bash
-$ http PUT :8080/api/objects/token1/groups/token Content-type:application/json
-```
-
-```http
-HTTP/1.1 204 No Content
-content-length: 0
-content-type: application/json
-date: Mon, 15 May 2017 21:30:17 GMT
-server: Cowboy
-```
-
-#### Ask if request reach some limits
-
-```bash
-$ http PUT :8080/api/objects/token1/_isreached Content-type:application/json
-```
-
-```http
-HTTP/1.1 200 OK
-content-length: 190
-content-type: application/json
-date: Mon, 15 May 2017 21:31:32 GMT
-server: Cowboy
-
-{
-    "info": [
-        {
-            "extra": [
-                {
-                    "expiry": 825,
-                    "type": "Token-15min",
-                    "max": 100,
-                    "remaining": 100
-                },
-                {
-                    "expiry": 86325,
-                    "type": "Token-Daily",
-                    "max": 1000,
-                    "remaining": 1000
-                }
-            ],
-            "is_reached": false
-        }
-    ],
-    "is_reached": false
-}
-```
-
-In case, a limit is reached, you will receive a response like:
-
-```http
-HTTP/1.1 200 OK
-content-length: 185
-content-type: application/json
-date: Mon, 15 May 2017 21:33:51 GMT
-server: Cowboy
-
-{
-    "info": [
-        {
-            "extra": [
-                {
-                    "expiry": 685,
-                    "type": "Token-15min",
-                    "max": 100,
-                    "remaining": 0
-                },
-                {
-                    "expiry": 86185,
-                    "type": "Token-Daily",
-                    "max": 1000,
-                    "remaining": 900
-                }
-            ],
-            "is_reached": true
-        }
-    ],
-    "is_reached": true
-}
-```
 
 Make a servers cluster
----------------------
+----------------------
 
 Open the first console and run:
 
@@ -215,13 +205,25 @@ Open the first console and run:
 In another console run:
 
     $ make node2
-    1> minidb:join('test1@127.0.0.1').
+
+Node 2 will automatically connect after 5 second to the node 1 in cluster.
 
 Now you can open a websocket connect to `ws://127.0.0.1:8080/websocket` or to
 `ws://127.0.0.1:8081/websocket`.
+Or make a REST call to one of them.
 
-You can note that the node you are choosing is not important.
-Also, at runtime, you can disconnect from one and connect to the other without
-loosing information.
+The node you are choosing is not relevant. Any node can be used.
 
-It can be useful to create a connection pool from client side.
+At client side can be useful create a connection pool and have connections
+with all of them.
+
+Run with docker
+---------------
+
+There is an example of instance running on docker:
+
+    $ docker-compose build
+    $ docker-compose up
+
+Now you will have a node available on `ws://127.0.0.1:8080/websocket`
+or REST API at `http://127.0.0.1:8080/api`.

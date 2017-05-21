@@ -13,9 +13,6 @@
 -export([start/2, stop/1]).
 
 -type appctx() :: any().
--type key()      :: binary().
--type pairs()  :: list({key(), value()}).
--type value()    :: binary().
 
 %%====================================================================
 %% API

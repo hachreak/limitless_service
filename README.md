@@ -227,3 +227,9 @@ There is an example of instance running on docker:
 
 Now you will have a node available on `ws://127.0.0.1:8080/websocket`
 or REST API at `http://127.0.0.1:8080/api`.
+
+Run a release
+-------------
+
+    $ rebar3 release
+    $ rebar3 run

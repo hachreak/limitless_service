@@ -22,9 +22,7 @@ start(_StartType, _StartArgs) ->
   WsPort = application:get_env(limitless_service, ws_port, 8080),
   Protocol = application:get_env(limitless_service, protocol, http),
   Dispatch = cowboy_router:compile([
-    {'_', routes(#{protocol => Protocol}) ++ [
-      {"/", limitless_service_handler, {}}
-    ]}
+    {'_', routes(#{protocol => Protocol})}
   ]),
   {ok, _} = cowboy:start_http(http, 100, [{port, WsPort}], [
     {env, [{dispatch, Dispatch}]}

@@ -13,6 +13,6 @@
 
 %%%_ * API -------------------------------------------------------------
 
-put(_Event, Req, [ObjectId, GroupIdString], _AppCtx) ->
+put(_Event, Req, [ObjectId, GroupIdString], AppCtx) ->
   limitless_service_api:setup(ObjectId, GroupIdString),
-  {reply, #{}, Req}.
+  {reply, #{}, Req, AppCtx}.

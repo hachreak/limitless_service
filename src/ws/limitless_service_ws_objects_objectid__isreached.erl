@@ -13,6 +13,6 @@
 
 %%%_ * API -------------------------------------------------------------
 
-put(_Event, Req, [ObjectId], _AppCtx) ->
+put(_Event, Req, [ObjectId], AppCtx) ->
   Result = limitless_service_api:is_reached(ObjectId),
-  {reply, Result, Req}.
+  {reply, Result, Req, AppCtx}.

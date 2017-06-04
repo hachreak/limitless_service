@@ -65,7 +65,7 @@ http(HttpPort, Protocol) ->
     {env, [{dispatch, Dispatch}]}
   ]).
 
--spec routes(appctx()) -> {http | https, cowboy_router:routes()}.
+-spec routes(appctx()) -> cowboy_router:routes().
 routes(#{protocol := Protocol}) ->
   Filename = swagger_filename(),
   Yaml = swagger_routerl:load(Filename),

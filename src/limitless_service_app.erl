@@ -19,15 +19,22 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
-  HttpConfig = application:get_env(limitless_service, http, []),
-  HttpPort = proplists:get_value(port, HttpConfig, 8080),
-  Protocol = proplists:get_value(protocol, HttpConfig, http),
-  http(HttpPort, Protocol),
+  ServicesConfig = application:get_env(limitless_service, services, []),
 
-  TcpConfig = application:get_env(limitless_service, tcp, []),
-  TcpServerName = proplists:get_value(name, TcpConfig, "limitless"),
-  TcpPort = proplists:get_value(port, TcpConfig, 54355),
-  tcp(TcpServerName, TcpPort),
+  lists:foreach(
+    fun(http) ->
+      HttpConfig = application:get_env(limitless_service, http, []),
+      HttpPort = proplists:get_value(port, HttpConfig, 8080),
+      Protocol = proplists:get_value(protocol, HttpConfig, http),
+      http(HttpPort, Protocol);
+       (tcp) ->
+      TcpConfig = application:get_env(limitless_service, tcp, []),
+      TcpServerName = proplists:get_value(name, TcpConfig, "limitless"),
+      TcpPort = proplists:get_value(port, TcpConfig, 54355),
+      tcp(TcpServerName, TcpPort);
+       (Service) ->
+      error_logger:warning_msg("Unknown ~p service", [Service])
+    end, ServicesConfig),
 
   limitless_service_sup:start_link().
 

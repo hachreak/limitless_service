@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc limitless_service websocket handler
+%% @doc limitless_service socket (websocket or tcp) handler
 %% @end
 %%%-------------------------------------------------------------------
 
--module(limitless_service_ws_objects_objectid_groups_groupid).
+-module(limitless_service_socket_objects_objectid__isreached).
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
@@ -13,6 +13,6 @@
 
 %%%_ * API -------------------------------------------------------------
 
-put(_Event, Req, [ObjectId, GroupIdString], AppCtx) ->
-  limitless_service_api:setup(ObjectId, GroupIdString),
-  {reply, #{}, Req, AppCtx}.
+put(_Event, Req, [ObjectId], AppCtx) ->
+  Result = limitless_service_api:is_reached(ObjectId),
+  {reply, Result, Req, AppCtx}.

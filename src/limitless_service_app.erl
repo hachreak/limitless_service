@@ -19,9 +19,10 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
-  WsPort = application:get_env(limitless_service, ws_port, 8080),
-  Protocol = application:get_env(limitless_service, protocol, http),
-  http(WsPort, Protocol),
+  HttpConfig = application:get_env(limitless_service, http, []),
+  HttpPort = proplists:get_value(port, HttpConfig, 8080),
+  Protocol = proplists:get_value(protocol, HttpConfig, http),
+  http(HttpPort, Protocol),
 
   TcpConfig = application:get_env(limitless_service, tcp, []),
   TcpServerName = proplists:get_value(name, TcpConfig, "limitless"),
@@ -49,11 +50,11 @@ tcp(TcpServerName, TcpPort) ->
   {ok, _} = ranch:start_listener(
     Name, 100, ranch_tcp, [{port, Port}], Handler, AppCtx).
 
-http(WsPort, Protocol) ->
+http(HttpPort, Protocol) ->
   Dispatch = cowboy_router:compile([
     {'_', routes(#{protocol => Protocol})}
   ]),
-  {ok, _} = cowboy:start_http(http, 100, [{port, WsPort}], [
+  {ok, _} = cowboy:start_http(http, 100, [{port, HttpPort}], [
     {env, [{dispatch, Dispatch}]}
   ]).
 
